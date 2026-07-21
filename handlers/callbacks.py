@@ -51,3 +51,15 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text("ابتدا ثبت‌نام کنید: /start")
     else:
         await query.edit_message_text("🔜 این بخش به‌زودی اضافه می‌شود.")
+# handlers/callbacks.py
+from trucks.handlers import show_brands
+
+async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    if data == "menu_trucks":
+        await show_brands(update, context)   # <-- تغییر اینجا
+    elif data == "menu_cargo":
+        await query.edit_message_text("📦 بخش بارها به‌زودی فعال می‌شود.")
+    # ... بقیه بدون تغییر
