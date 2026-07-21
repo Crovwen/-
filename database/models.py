@@ -148,9 +148,11 @@ def get_user(user_id: int):
     db = Database()
     cursor = db.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
-    if row:
-        return dict(row)
-    return None
+    if row is None:
+        return None
+    # تبدیل tuple به دیکشنری با استفاده از نام ستون‌ها
+    columns = [desc[0] for desc in cursor.description]
+    return dict(zip(columns, row))
 
 def create_user(user_id, username, first_name, last_name, language_code, is_premium, referred_by=None):
     db = Database()
