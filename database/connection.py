@@ -1,4 +1,3 @@
-# database/connection.py
 import sqlite3
 import threading
 from config import Config
@@ -14,7 +13,7 @@ class Database:
                 cls._instance._connection = sqlite3.connect(
                     Config.DATABASE_PATH,
                     check_same_thread=False,
-                    isolation_level=None  # دستی transactionها را مدیریت می‌کنیم
+                    isolation_level=None
                 )
                 cls._instance._connection.execute("PRAGMA journal_mode=WAL;")
                 cls._instance._connection.execute("PRAGMA foreign_keys=ON;")
@@ -25,10 +24,8 @@ class Database:
         return self._connection
 
     def execute(self, query, params=()):
-        """اجرای یک کوئری با مدیریت قفل نویسی"""
         with self._lock:
-            cursor = self._connection.execute(query, params)
-            return cursor
+            return self._connection.execute(query, params)
 
     def executemany(self, query, seq):
         with self._lock:
@@ -40,4 +37,4 @@ class Database:
 
     def close(self):
         with self._lock:
-            self._connection.close()
+            self._connection.close() 
