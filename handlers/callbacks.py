@@ -7,7 +7,7 @@ from trucks.handlers import show_brands
 from cargo.handlers import show_cargo_list, select_route, start_travel
 from parts.handlers import parts_menu_handler, repair_handler, upgrade_handler
 from investments.handlers import buildings_menu, buy_building, upgrade_building
-from market.handlers import market_menu, list_truck, buy_listed_truck, remove_listing
+from market.handlers import market_menu, list_truck, buy_listed_truck   # <-- remove_listing حذف شد
 from auction.handlers import auction_menu, place_bid
 from weekly.handlers import weekly_menu
 import logging
@@ -47,7 +47,6 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data
-    # دیسپچ به ماژول‌های مختلف
     if data == "menu_trucks":
         await show_brands(update, context)
     elif data == "menu_cargo":
