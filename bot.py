@@ -38,3 +38,12 @@ def main():
 
 if __name__ == "__main__":
     main() 
+from trucks.handlers import show_brands, show_truck_list, show_truck_detail, buy_truck
+
+# ... بعد از ثبت قبلی ها
+app.add_handler(CallbackQueryHandler(show_brands, pattern="^menu_trucks$"))
+app.add_handler(CallbackQueryHandler(show_truck_list, pattern="^brand_"))
+app.add_handler(CallbackQueryHandler(show_truck_detail, pattern="^truck_"))
+app.add_handler(CallbackQueryHandler(buy_truck, pattern="^buy_"))
+# همچنین هندلر main_menu (برای بازگشت)
+app.add_handler(CallbackQueryHandler(go_main_menu, pattern="^main_menu$"))
