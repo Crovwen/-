@@ -15,7 +15,7 @@ from market.handlers import market_menu, list_truck, buy_listed_truck
 from auction.handlers import auction_menu, place_bid
 from weekly.handlers import weekly_menu
 from quiz.handlers import hourly_quiz, check_quiz_answer
-from handlers.group_events import track_group
+#from handlers.group_events import track_group
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ def main():
     app.add_handler(CallbackQueryHandler(place_bid, pattern="^bid_"))
 
     # group tracking
-    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, track_group))
+    #app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, track_group))
     # quiz answer
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, check_quiz_answer), group=1)
 
