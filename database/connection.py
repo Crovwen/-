@@ -17,7 +17,7 @@ class Database:
                 )
                 cls._instance._connection.execute("PRAGMA journal_mode=WAL;")
                 cls._instance._connection.execute("PRAGMA foreign_keys=ON;")
-        self._connection.row_factory = sqlite3.Row
+                cls._instance._connection.row_factory = sqlite3.Row   # <-- این خط اصلاح‌شده
         return cls._instance
 
     @property
@@ -38,4 +38,4 @@ class Database:
 
     def close(self):
         with self._lock:
-            self._connection.close() 
+            self._connection.close()
