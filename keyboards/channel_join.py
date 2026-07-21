@@ -1,4 +1,3 @@
-# keyboards/channel_join.py
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from config import Config
 
