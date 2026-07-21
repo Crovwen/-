@@ -17,6 +17,7 @@ class Database:
                 )
                 cls._instance._connection.execute("PRAGMA journal_mode=WAL;")
                 cls._instance._connection.execute("PRAGMA foreign_keys=ON;")
+        self._connection.row_factory = sqlite3.Row
         return cls._instance
 
     @property
