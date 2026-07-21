@@ -60,3 +60,47 @@ def update_balance(user_id: int, amount: int):
         )
         if cursor.rowcount == 0:
             raise ValueError("موجودی کافی نیست یا کاربر وجود ندارد") 
+# database/models.py (بخش اضافه‌شده)
+def init_db():
+    # ... (کدهای قبلی)
+    # جدول کامیون‌های کاربر
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS user_trucks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            truck_model TEXT NOT NULL,
+            purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_active INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+        );
+    """)
+    db.execute("CREATE INDEX IF NOT EXISTS idx_user_trucks ON user_trucks(user_id, truck_model);")
+    db.commit()
+
+def add_user_truck(user_id: int, truck_model: str) -> bool:
+    """اضافه کردن کامیون به گاراژ کاربر. اگر کاربر پول کافی نداشته باشد False برمی‌گرداند."""
+    from .connection import Database
+    db = Database()
+    # ابتدا قیمت کامیون را از دیتای کامیون‌ها بگیریم (import از trucks.data)
+    from trucks.data import TRUCK_PRICES  # بعداً تعریف می‌کنیم
+    price = TRUCK_PRICES.get(truck_model)
+    if price is None:
+        raise ValueError("مدل کامیون نامعتبر است.")
+    with db.connection:
+        # قفل کردن ردیف کاربر و کسر موجودی
+        cursor = db.execute(
+            "UPDATE users SET balance = balance - ? WHERE user_id = ? AND balance >= ?",
+            (price, user_id, price)
+        )
+        if cursor.rowcount == 0:
+            return False  # موجودی کافی نیست
+        # افزودن کامیون
+        db.execute(
+            "INSERT INTO user_trucks (user_id, truck_model) VALUES (?, ?)",
+            (user_id, truck_model)
+        )
+        # اگر این اولین کامیون کاربر است، فعالش کن
+        count = db.execute("SELECT COUNT(*) FROM user_trucks WHERE user_id = ?", (user_id,)).fetchone()[0]
+        if count == 1:
+            db.execute("UPDATE user_trucks SET is_active = 1 WHERE id = last_insert_rowid()")
+    return True
