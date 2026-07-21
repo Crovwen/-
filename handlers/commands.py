@@ -25,7 +25,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             last_name=user.last_name,
             language_code=user.language_code,
             is_premium=user.is_premium or False,
-            referred_by=referred_by
+            referred_by=referred_by   # حالا تعریف شده است
         )
         if "referrer_id" in context.user_data:
             await apply_referral_rewards(update, context)
