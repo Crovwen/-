@@ -1,28 +1,23 @@
-# handlers/commands.py
 import logging
-from telegram import Update, constants
+from telegram import Update
 from telegram.ext import ContextTypes
-from database.models import get_user, create_user, update_balance
+from database.models import get_user, create_user, get_user_active_truck, update_balance
 from middlewares.membership import require_membership, send_channel_join_prompt, is_user_member
 from keyboards.main_menu import main_menu_keyboard
 from messages.welcome import welcome_message
-from handlers.referral import process_referral
+from handlers.referral import process_referral, apply_referral_rewards
 
 logger = logging.getLogger(__name__)
 
 @require_membership
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """کامند /start با پشتیبانی از لینک رفرال"""
     user = update.effective_user
-    args = context.args  # مثلاً /start REF123456
+    args = context.args
     referred_by = None
     if args:
-        # کد رفرال ورودی را پردازش می‌کنیم
         await process_referral(update, context, args[0])
-    # بررسی وجود کاربر
     db_user = get_user(user.id)
     if not db_user:
-        # کاربر جدید
         create_user(
             user_id=user.id,
             username=user.username,
@@ -32,21 +27,27 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             is_premium=user.is_premium or False,
             referred_by=referred_by
         )
-    # ارسال خوش‌آمدگویی و منوی اصلی
-    text = welcome_message(user.first_name)
-    await update.message.reply_text(text, reply_markup=main_menu_keyboard(), parse_mode="HTML")
+        if "referrer_id" in context.user_data:
+            await apply_referral_rewards(update, context)
+    await update.message.reply_text(
+        welcome_message(user.first_name),
+        reply_markup=main_menu_keyboard(),
+        parse_mode="HTML"
+    )
 
 async def profile_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """نمایش پروفایل"""
     user = update.effective_user
     db_user = get_user(user.id)
     if not db_user:
         await update.message.reply_text("⚠️ ابتدا با /start ثبت‌نام کنید.")
         return
+    truck = get_user_active_truck(user.id)
+    truck_text = truck["truck_model"] if truck else "ندارید"
     text = (
         f"👤 پروفایل شما:\n"
         f"🆔 شناسه: {user.id}\n"
         f"💰 سکه: {db_user['balance']:,}\n"
+        f"🚛 ماشین فعال: {truck_text}\n"
         f"🔗 لینک دعوت: https://t.me/{context.bot.username}?start={db_user['referral_code']}"
     )
     await update.message.reply_text(text, parse_mode="HTML")
